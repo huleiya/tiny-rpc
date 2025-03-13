@@ -1,5 +1,7 @@
 package com.figgo.tinyrpc.config;
 
+import com.figgo.tinyrpc.serializer.Serializer;
+import com.figgo.tinyrpc.serializer.SerializerKeys;
 import lombok.Data;
 import lombok.ToString;
 
@@ -24,5 +26,13 @@ public class RpcConfig {
     /**
      * 服务器端口号
      */
-    private Integer serverPort = 8081;
+    private Integer serverPort = 8080;
+    /**
+     * 是否启用模拟调用
+     */
+    private boolean mock = false;
+    /**
+     * 序列化器
+     */
+    private String serializer = SerializerKeys.JSON;
 }

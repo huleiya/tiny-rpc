@@ -1,10 +1,12 @@
 package com.figgo.tinyrpc.server;
 
+import com.figgo.tinyrpc.RpcApplication;
 import com.figgo.tinyrpc.model.RpcRequest;
 import com.figgo.tinyrpc.model.RpcResponse;
 import com.figgo.tinyrpc.registry.LocalRegistry;
 import com.figgo.tinyrpc.serializer.JdkSerializer;
 import com.figgo.tinyrpc.serializer.Serializer;
+import com.figgo.tinyrpc.serializer.SerializerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
@@ -27,7 +29,7 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
     @Override
     public void handle(HttpServerRequest request) {
         // 指定序列化器
-        final Serializer serializer = new JdkSerializer();
+        final Serializer serializer = SerializerFactory.getInstance(RpcApplication.getConfig().getSerializer());
 
         // 记录日志
         System.out.println("Received request: " + request.method() + " " + request.uri());
