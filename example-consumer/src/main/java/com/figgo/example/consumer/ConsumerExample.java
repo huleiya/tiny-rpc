@@ -2,17 +2,16 @@ package com.figgo.example.consumer;
 
 import com.figgo.example.common.model.User;
 import com.figgo.example.common.service.UserService;
+import com.figgo.tinyrpc.RpcApplication;
+import com.figgo.tinyrpc.config.RpcConfig;
 import com.figgo.tinyrpc.proxy.ServiceProxyFactory;
+import com.figgo.tinyrpc.utils.ConfigUtils;
 
-/**
- * 简易服务消费者示例
- */
-public class EasyConsumerExample {
-
+public class ConsumerExample {
     public static void main(String[] args) {
-        // 静态代理
-        //UserService userService = new UserServiceProxy();
-        // 动态代理
+        RpcConfig rpcConfig = ConfigUtils.loadConfig(RpcConfig.class, "rpc");
+        System.out.println(rpcConfig);
+
         UserService userService = ServiceProxyFactory.getProxy(UserService.class);
         User user = new User();
         user.setName("figgo");

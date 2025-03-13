@@ -19,17 +19,22 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-
+<!--        <dependency>-->
+<!--            <groupId>com.figgo</groupId>-->
+<!--            <artifactId>tiny-rpc-basic</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.figgo</groupId>
+            <artifactId>tiny-rpc-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.figgo</groupId>
             <artifactId>example-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.figgo</groupId>
-            <artifactId>tiny-rpc-basic</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+
         <!-- https://doc.hutool.cn/ -->
         <dependency>
             <groupId>cn.hutool</groupId>

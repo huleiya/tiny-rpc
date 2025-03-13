@@ -14,9 +14,14 @@
         <spring-boot.version>2.6.13</spring-boot.version>
     </properties>
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>com.figgo</groupId>-->
+<!--            <artifactId>tiny-rpc-basic</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.figgo</groupId>
-            <artifactId>tiny-rpc-basic</artifactId>
+            <artifactId>tiny-rpc-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
