@@ -1,0 +1,1 @@
+kryo=com.figgo.tinyrpc.serializer.KryoSerializer
