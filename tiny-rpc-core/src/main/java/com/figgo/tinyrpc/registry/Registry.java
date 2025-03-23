@@ -3,7 +3,9 @@ package com.figgo.tinyrpc.registry;
 import com.figgo.tinyrpc.config.RegistryConfig;
 import com.figgo.tinyrpc.model.ServiceMetaInfo;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public interface Registry {
     /**
@@ -38,4 +40,14 @@ public interface Registry {
      * 服务销毁
      */
     void destroy();
+
+    /**
+     * 心跳检测（服务端）
+     */
+    void heartBeat();
+
+    /**
+     * 监听（消费端）
+     */
+    void watch(String serviceNodeKey);
 }

@@ -1,4 +1,4 @@
-package com.figgo.tinyrpc.basic;
+package com.figgo.tinyrpc.core;
 
 import com.figgo.tinyrpc.config.RegistryConfig;
 import com.figgo.tinyrpc.model.ServiceMetaInfo;
@@ -64,5 +64,13 @@ public class RegistryTest {
         String serviceKey = serviceMetaInfo.getServiceKey();
         List<ServiceMetaInfo> serviceMetaInfoList = registry.serviceDiscovery(serviceKey);
         Assertions.assertNotNull(serviceMetaInfoList);
+    }
+
+    @Test
+    public void heartBeat() throws Exception {
+        // init 方法中已经执行心跳检测了
+        register();
+        // 阻塞 1 分钟
+        Thread.sleep(60 * 1000L);
     }
 }

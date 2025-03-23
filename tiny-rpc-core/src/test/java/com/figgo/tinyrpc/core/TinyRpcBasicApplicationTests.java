@@ -1,4 +1,4 @@
-package com.figgo.tinyrpc.basic;
+package com.figgo.tinyrpc.core;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
