@@ -10,6 +10,7 @@ import com.figgo.tinyrpc.registry.Registry;
 import com.figgo.tinyrpc.registry.RegistryFactory;
 import com.figgo.tinyrpc.server.HttpServer;
 import com.figgo.tinyrpc.server.VertxHttpServer;
+import com.figgo.tinyrpc.server.tcp.VertxTcpServer;
 
 /**
  * 简易服务提供者示例
@@ -38,8 +39,8 @@ public class ProviderExample {
             throw new RuntimeException(e);
         }
 
-        // 启动 web
-        HttpServer httpServer = new VertxHttpServer();
-        httpServer.doStart(rpcConfig.getServerPort());
+        // 启动 TCP 服务
+        VertxTcpServer vertxTcpServer = new VertxTcpServer();
+        vertxTcpServer.doStart(8080);
     }
 }

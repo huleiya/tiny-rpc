@@ -1,8 +1,6 @@
 package com.figgo.tinyrpc.proxy;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import com.figgo.tinyrpc.RpcApplication;
 import com.figgo.tinyrpc.config.RegistryConfig;
 import com.figgo.tinyrpc.constant.RpcConstant;
@@ -11,11 +9,10 @@ import com.figgo.tinyrpc.model.RpcResponse;
 import com.figgo.tinyrpc.model.ServiceMetaInfo;
 import com.figgo.tinyrpc.registry.Registry;
 import com.figgo.tinyrpc.registry.RegistryFactory;
-import com.figgo.tinyrpc.serializer.JdkSerializer;
 import com.figgo.tinyrpc.serializer.Serializer;
 import com.figgo.tinyrpc.serializer.SerializerFactory;
+import com.figgo.tinyrpc.server.tcp.VertxTcpClient;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -28,7 +25,6 @@ public class ServiceProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 指定序列化器
-        //Serializer serializer = new JdkSerializer();
         final Serializer serializer = SerializerFactory.getInstance(RpcApplication.getConfig().getSerializer());
         // 构造请求
         String serviceName = method.getDeclaringClass().getName();
@@ -38,10 +34,8 @@ public class ServiceProxy implements InvocationHandler {
                 .parameterTypes(method.getParameterTypes())
                 .args(args)
                 .build();
+
         try {
-            // 序列化请求
-            byte[] requestBytes = serializer.serialize(rpcRequest);
-            // 发送请求
             // 从注册中心获取服务提供者请求地址
             RegistryConfig registryConfig = RpcApplication.getConfig().getRegistryConfig();
             Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
@@ -53,17 +47,12 @@ public class ServiceProxy implements InvocationHandler {
                 throw new RuntimeException("No service provider found for " + serviceName);
             }
             ServiceMetaInfo selectedServiceMetaInfo = serviceMetaInfoList.get(0);
-            try (HttpResponse httpResponse = HttpRequest.post(selectedServiceMetaInfo.getServiceAddress())
-                    .body(requestBytes)
-                    .execute()) {
-                byte[] result = httpResponse.bodyBytes();
-                // 反序列化响应
-                RpcResponse rpcResponse = serializer.deserialize(result, RpcResponse.class);
-                return rpcResponse.getData();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            // 发送 TCP 请求
+            RpcResponse rpcResponse = VertxTcpClient.doRequest(selectedServiceMetaInfo, rpcRequest);
+            return rpcResponse.getData();
+        } catch (Exception e) {
+            throw new RuntimeException("调用失败");
         }
-        return null;
     }
 }
