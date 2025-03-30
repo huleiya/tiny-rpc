@@ -5,6 +5,8 @@ import com.figgo.tinyrpc.RpcApplication;
 import com.figgo.tinyrpc.config.RegistryConfig;
 import com.figgo.tinyrpc.config.RpcConfig;
 import com.figgo.tinyrpc.constant.RpcConstant;
+import com.figgo.tinyrpc.fault.retry.RetryStrategy;
+import com.figgo.tinyrpc.fault.retry.RetryStrategyFactory;
 import com.figgo.tinyrpc.loadbalancer.LoadBalancer;
 import com.figgo.tinyrpc.loadbalancer.LoadBalancerFactory;
 import com.figgo.tinyrpc.model.RpcRequest;
@@ -59,10 +61,13 @@ public class ServiceProxy implements InvocationHandler {
             Map<String, Object> requestParams = new HashMap<>();
             requestParams.put("methodName", rpcRequest.getMethodName());
             ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfoList);
-            System.out.println(selectedServiceMetaInfo);
 
             // 发送 TCP 请求
-            RpcResponse rpcResponse = VertxTcpClient.doRequest(selectedServiceMetaInfo, rpcRequest);
+            // 使用重试机制
+            RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+            RpcResponse rpcResponse = retryStrategy.doRetry(() ->
+                    VertxTcpClient.doRequest(selectedServiceMetaInfo, rpcRequest)
+            );
             return rpcResponse.getData();
         } catch (Exception e) {
             throw new RuntimeException("调用失败");

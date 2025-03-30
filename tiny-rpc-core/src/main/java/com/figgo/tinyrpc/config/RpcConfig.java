@@ -1,5 +1,6 @@
 package com.figgo.tinyrpc.config;
 
+import com.figgo.tinyrpc.fault.retry.RetryStrategyKeys;
 import com.figgo.tinyrpc.loadbalancer.LoadBalancerKeys;
 import com.figgo.tinyrpc.serializer.SerializerKeys;
 import lombok.Data;
@@ -43,4 +44,8 @@ public class RpcConfig {
      * 负载均衡器
      */
     private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+    /**
+     * 重试策略
+     */
+    private String retryStrategy = RetryStrategyKeys.FIXED_INTERVAL;
 }

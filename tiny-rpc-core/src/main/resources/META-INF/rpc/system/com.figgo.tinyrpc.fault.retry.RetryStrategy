@@ -1,0 +1,3 @@
+no=com.figgo.tinyrpc.fault.retry.NoRetryStrategy
+fixedInterval=com.figgo.tinyrpc.fault.retry.FixedIntervalRetryStrategy
+

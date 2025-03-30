@@ -1,1 +1,3 @@
 jdk=com.figgo.tinyrpc.serializer.JdkSerializer
+hessian=com.figgo.tinyrpc.serializer.HessianSerializer
+json=com.figgo.tinyrpc.serializer.JsonSerializer
