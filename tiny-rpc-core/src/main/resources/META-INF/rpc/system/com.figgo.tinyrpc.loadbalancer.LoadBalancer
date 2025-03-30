@@ -1,0 +1,4 @@
+roundRobin=com.figgo.tinyrpc.loadbalancer.RoundRobinLoadBalancer
+random=com.figgo.tinyrpc.loadbalancer.RandomLoadBalancer
+consistentHash=com.figgo.tinyrpc.loadbalancer.ConsistentHashLoadBalancer
+

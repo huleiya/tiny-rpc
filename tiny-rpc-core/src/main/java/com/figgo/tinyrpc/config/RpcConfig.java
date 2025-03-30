@@ -1,6 +1,6 @@
 package com.figgo.tinyrpc.config;
 
-import com.figgo.tinyrpc.serializer.Serializer;
+import com.figgo.tinyrpc.loadbalancer.LoadBalancerKeys;
 import com.figgo.tinyrpc.serializer.SerializerKeys;
 import lombok.Data;
 import lombok.ToString;
@@ -39,4 +39,8 @@ public class RpcConfig {
      * 注册中心配置
      */
     private RegistryConfig registryConfig = new RegistryConfig();
+    /**
+     * 负载均衡器
+     */
+    private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
 }
