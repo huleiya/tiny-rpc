@@ -1,0 +1,5 @@
+failFast=com.figgo.tinyrpc.fault.tolerant.FailFastTolerantStrategy
+failBack=com.figgo.tinyrpc.fault.tolerant.FailBackTolerantStrategy
+failOver=com.figgo.tinyrpc.fault.tolerant.FailOverTolerantStrategy
+failSafe=com.figgo.tinyrpc.fault.tolerant.FailSafeTolerantStrategy
+

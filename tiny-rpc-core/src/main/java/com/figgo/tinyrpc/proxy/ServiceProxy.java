@@ -7,6 +7,8 @@ import com.figgo.tinyrpc.config.RpcConfig;
 import com.figgo.tinyrpc.constant.RpcConstant;
 import com.figgo.tinyrpc.fault.retry.RetryStrategy;
 import com.figgo.tinyrpc.fault.retry.RetryStrategyFactory;
+import com.figgo.tinyrpc.fault.tolerant.TolerantStrategy;
+import com.figgo.tinyrpc.fault.tolerant.TolerantStrategyFactory;
 import com.figgo.tinyrpc.loadbalancer.LoadBalancer;
 import com.figgo.tinyrpc.loadbalancer.LoadBalancerFactory;
 import com.figgo.tinyrpc.model.RpcRequest;
@@ -31,9 +33,6 @@ public class ServiceProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // 指定序列化器
-        RpcConfig rpcConfig = RpcApplication.getConfig();
-        final Serializer serializer = SerializerFactory.getInstance(rpcConfig.getSerializer());
         // 构造请求
         String serviceName = method.getDeclaringClass().getName();
         RpcRequest rpcRequest = RpcRequest.builder()
@@ -43,34 +42,37 @@ public class ServiceProxy implements InvocationHandler {
                 .args(args)
                 .build();
 
+        // 从注册中心获取服务提供者请求地址
+        RpcConfig rpcConfig = RpcApplication.getConfig();
+        Registry registry = RegistryFactory.getInstance(rpcConfig.getRegistryConfig().getRegistry());
+        ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
+        serviceMetaInfo.setServiceName(serviceName);
+        serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
+        List<ServiceMetaInfo> serviceMetaInfoList = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
+        if (CollUtil.isEmpty(serviceMetaInfoList)) {
+            throw new RuntimeException("No service provider found for " + serviceName);
+        }
+
+        // 负载均衡选择服务提供者
+        LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+        // 将调用方法名（请求路径）作为负载均衡参数
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("methodName", rpcRequest.getMethodName());
+        ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfoList);
+
+        RpcResponse rpcResponse;
         try {
-            // 从注册中心获取服务提供者请求地址
-            RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
-            Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
-            ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
-            serviceMetaInfo.setServiceName(serviceName);
-            serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
-            List<ServiceMetaInfo> serviceMetaInfoList = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
-            if (CollUtil.isEmpty(serviceMetaInfoList)) {
-                throw new RuntimeException("No service provider found for " + serviceName);
-            }
-
-            // 负载均衡选择服务提供者
-            LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
-            // 将调用方法名（请求路径）作为负载均衡参数
-            Map<String, Object> requestParams = new HashMap<>();
-            requestParams.put("methodName", rpcRequest.getMethodName());
-            ServiceMetaInfo selectedServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfoList);
-
-            // 发送 TCP 请求
+            // 使用自定义协议发送 RPC 请求
             // 使用重试机制
             RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
-            RpcResponse rpcResponse = retryStrategy.doRetry(() ->
+            rpcResponse = retryStrategy.doRetry(() ->
                     VertxTcpClient.doRequest(selectedServiceMetaInfo, rpcRequest)
             );
-            return rpcResponse.getData();
         } catch (Exception e) {
-            throw new RuntimeException("调用失败");
+            // 容错机制
+            TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
+            rpcResponse = tolerantStrategy.doTolerant(null, e);
         }
+        return rpcResponse.getData();
     }
 }
